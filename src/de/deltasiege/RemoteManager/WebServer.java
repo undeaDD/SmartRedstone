@@ -21,6 +21,7 @@ public class WebServer {
 			server.setExecutor(null);
 			server.start();
 		} catch (IOException e) {
+			e.printStackTrace();
 			System.out.println("WebServer could not be created. Your current java jre version does not support HttpServers");
 			remoteManager.plugin.getServer().getPluginManager().disablePlugin(remoteManager.plugin);
 		}
