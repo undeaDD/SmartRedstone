@@ -1,8 +1,6 @@
 package de.deltasiege.SmartRedstone;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
-
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,7 +10,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
-
 import de.deltasiege.Models.Utils;
 
 public class SmartEvents implements Listener {
