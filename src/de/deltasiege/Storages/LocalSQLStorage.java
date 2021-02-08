@@ -1,4 +1,6 @@
 package de.deltasiege.Storages;
+import java.util.UUID;
+
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
 import com.pablo67340.SQLiteLib.Main.SQLiteLib;
@@ -16,7 +18,7 @@ public class LocalSQLStorage implements StorageWrapper {
 	}
 
 	@Override
-	public boolean deviceIsPaired(HumanEntity player, Location loc) {
+	public boolean deviceIsPaired(UUID player, Location loc) {
 		// TODO Auto-generated method stub
 		return false;
 	}

@@ -11,12 +11,19 @@ public class SmartRedstone extends JavaPlugin {
 	public StorageWrapper storage;
 	public RemoteManager remoteManager;
 	public SmartEvents eventListener;
+	public SmartCommands commandHandler;
 	
 	@Override
 	public void onEnable() {
+		try { Utils.setUpNMS(); } catch (Exception error) {
+			Utils.log("This MC Version is not supported (NMSReflectionException). Plugin will now be disabled");
+			getServer().getPluginManager().disablePlugin(this);
+		}
+
 		storage = new TemporaryStorage(this);
 		remoteManager = new RemoteManager(this);
 		eventListener = new SmartEvents(this);
+		commandHandler = new SmartCommands(this);
 		super.onEnable();
 	}
 	

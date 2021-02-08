@@ -22,10 +22,10 @@ public class TemporaryStorage implements StorageWrapper {
 	}
 
 	@Override
-	public boolean deviceIsPaired(HumanEntity player, Location loc) {
+	public boolean deviceIsPaired(UUID player, Location loc) {
 		String key = getWorldKey(loc);
 		if (deviceData.containsKey(key)) {
-			return deviceData.get(key).contains(player.getUniqueId());
+			return deviceData.get(key).contains(player);
 		} else {
 			return false;
 		}
@@ -35,7 +35,7 @@ public class TemporaryStorage implements StorageWrapper {
 	public boolean pairDevice(HumanEntity player, Location loc) {
 		if (!playerData.containsKey(player.getUniqueId())) {
 			playerData.put(player.getUniqueId(), "");
-			player.sendMessage(Utils.prefix + " Dont forget to register your Companion App");
+			Utils.sendRegisterReminder(player);
 		}
 		
 		String key = getWorldKey(loc);
@@ -55,7 +55,7 @@ public class TemporaryStorage implements StorageWrapper {
 	public boolean unpairDevice(HumanEntity player, Location loc) {
 		if (!playerData.containsKey(player.getUniqueId())) {
 			playerData.put(player.getUniqueId(), "");
-			player.sendMessage(Utils.prefix + " Dont forget to register your Companion App");
+			Utils.sendRegisterReminder(player);
 		}
 		
 		String key = getWorldKey(loc);

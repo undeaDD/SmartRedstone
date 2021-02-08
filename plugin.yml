@@ -5,3 +5,7 @@ version: '1.0.1'
 load: POSTWORLD
 description: Rust like Smart Things (+ Companion App)
 authors: [undeaD_D, Juli971Master]
+commands:
+  sd:
+    description: Smart Redstone command
+    usage: /sd <option>

@@ -40,7 +40,7 @@ public class SmartEvents implements Listener {
 				event.setCancelled(true);
 				tempStorage.put(event.getPlayer().getUniqueId(), event.getClickedBlock().getLocation());
 				Utils.playSound(event.getPlayer(), Sound.BLOCK_BARREL_OPEN);
-				if (this.plugin.storage.deviceIsPaired(event.getPlayer(), event.getClickedBlock().getLocation())) {
+				if (this.plugin.storage.deviceIsPaired(event.getPlayer().getUniqueId(), event.getClickedBlock().getLocation())) {
 					event.getPlayer().openInventory(removeMenu);
 				} else {
 					event.getPlayer().openInventory(addMenu);

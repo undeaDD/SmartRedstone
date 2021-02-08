@@ -1,4 +1,6 @@
 package de.deltasiege.Storages;
+import java.util.UUID;
+
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
 
@@ -6,12 +8,12 @@ public interface StorageWrapper {
 	/**
 	 * Check if Player is paired with the SmartDevice at the Location
 	 * 
-	 * @param  Player player - Player to check against
+	 * @param  UUID player   - Player UUID to check against
 	 * @param  Location loc  - Location of the SmartDevice 
 	 * 
 	 * @return boolean       - is the device paired or not
 	 */
-	public boolean deviceIsPaired(HumanEntity player, Location loc);
+	public boolean deviceIsPaired(UUID player, Location loc);
 	
 	/**
 	 * Player wants to pair the SmartDevice at the Location
