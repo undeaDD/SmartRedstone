@@ -14,7 +14,7 @@ public class TemporaryStorage implements StorageWrapper {
 	HashMap<UUID, String> playerData = new HashMap<UUID, String>();
 	
 	public TemporaryStorage(SmartRedstone plugin) {
-		System.out.println(Utils.prefix + " Temporary Storage loaded");
+		Utils.log("Temporary Storage loaded");
 	}
 	
 	private String getWorldKey(Location loc) {
@@ -85,7 +85,7 @@ public class TemporaryStorage implements StorageWrapper {
 			return false;
 		} else {
 			// send push to players devices
-			System.out.println(Utils.prefix + " sending Push to: " + players.toString());
+			Utils.log("sending Push to: " + players.toString());
 			return true;
 		}
 	}

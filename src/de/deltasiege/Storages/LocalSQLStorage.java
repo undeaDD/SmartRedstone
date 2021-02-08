@@ -12,7 +12,7 @@ public class LocalSQLStorage implements StorageWrapper {
 	public LocalSQLStorage(SmartRedstone plugin) {
 		this.plugin = plugin;
 		this.sql.initializeDatabase(plugin, "database", "CREATE TABLE IF NOT EXISTS smart_devices");
-		System.out.println(Utils.prefix + " Local SQL Storage loaded");
+		Utils.log("Local SQL Storage loaded");
 	}
 
 	@Override

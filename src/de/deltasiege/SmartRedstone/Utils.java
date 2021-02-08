@@ -24,6 +24,10 @@ public class Utils {
 
 	public static String prefix = "[" + ChatColor.RED + "SmartDevice" + ChatColor.RESET + "]";
 	
+	public static void log(String msg) {
+		System.out.println(ChatColor.stripColor(prefix + " " + msg.trim()));
+	}
+	
 	private static ItemStack createItemStack(ItemResult result) {
 		ItemStack item = null;
 		SkullMeta smeta;

@@ -23,7 +23,7 @@ public class WebServer {
 			server.setExecutor(null);
 			server.start();
 		} catch (IOException e) {
-			System.out.println(Utils.prefix + " WebServer could not be created. Plugin will now be disabled");
+			Utils.log("could not be created. Plugin will now be disabled");
 			remoteManager.plugin.getServer().getPluginManager().disablePlugin(remoteManager.plugin);
 		}
 	}
