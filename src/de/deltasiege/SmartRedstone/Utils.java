@@ -17,9 +17,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
 public class Utils {
-	public static Inventory addMenu = createAddMenu();
-	public static Inventory removeMenu = createRemoveMenu();
-	
 	public static ItemStack paper = createItemStack(ItemResult.infoItem);
 	public static ItemStack plus = createItemStack(ItemResult.addItem);
 	public static ItemStack minus = createItemStack(ItemResult.removeItem);
@@ -88,7 +85,7 @@ public class Utils {
 	public static void playSound(HumanEntity human, Sound sound) {
 		if (human instanceof Player) {
 			Player player = (Player) human;
-			player.playSound(player.getLocation(), sound, 10, 1);
+			player.playSound(player.getLocation(), sound, 1, 1);
 		}
 	}
 	

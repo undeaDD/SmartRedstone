@@ -14,7 +14,7 @@ public class SmartRedstone extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
-		storage = new TemporaryStorage();
+		storage = new TemporaryStorage(this);
 		remoteManager = new RemoteManager(this);
 		eventListener = new SmartEvents(this);
 		super.onEnable();
@@ -28,7 +28,7 @@ public class SmartRedstone extends JavaPlugin {
 
 		for (Player p : getServer().getOnlinePlayers()) {
 			Inventory temp = p.getOpenInventory().getTopInventory();
-			if (temp != null && (temp.equals(Utils.addMenu) || temp.equals(Utils.removeMenu))) {
+			if (temp != null && (temp.equals(eventListener.addMenu) || temp.equals(eventListener.removeMenu))) {
 				p.closeInventory();
 			}
 		}
