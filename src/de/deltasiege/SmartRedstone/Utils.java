@@ -106,7 +106,9 @@ public class Utils {
 	}
 	
 	public static ItemResult itemClicked(ItemStack current) {
-		if (current.equals(plus)) {
+		if (current == null) {
+			return ItemResult.infoItem;
+		} else if (current.equals(plus)) {
 			return ItemResult.addItem;
 		} else if (current.equals(minus)) {
 			return ItemResult.removeItem;

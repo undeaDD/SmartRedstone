@@ -92,7 +92,6 @@ public class SmartEvents implements Listener {
 
 	@EventHandler
 	public void onEmitRedstoneEvent(BlockRedstoneEvent event) {
-		System.out.println(event.getBlock().getType());
 		if (this.materials.contains(event.getBlock().getType())) {												
 			int update = event.getNewCurrent();					
 			if (event.getOldCurrent() != update) {	

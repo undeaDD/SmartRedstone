@@ -1,14 +1,17 @@
 package de.deltasiege.Storages;
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
+import com.pablo67340.SQLiteLib.Main.SQLiteLib;
 import de.deltasiege.SmartRedstone.SmartRedstone;
 import de.deltasiege.SmartRedstone.Utils;
 
 public class LocalSQLStorage implements StorageWrapper {
 	public SmartRedstone plugin;
-	
+	public SQLiteLib sql;
+
 	public LocalSQLStorage(SmartRedstone plugin) {
 		this.plugin = plugin;
+		this.sql.initializeDatabase(plugin, "database", "CREATE TABLE IF NOT EXISTS smart_devices");
 		System.out.println(Utils.prefix + " Local SQL Storage loaded");
 	}
 
