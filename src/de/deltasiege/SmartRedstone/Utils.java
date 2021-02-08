@@ -2,7 +2,6 @@ package de.deltasiege.SmartRedstone;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

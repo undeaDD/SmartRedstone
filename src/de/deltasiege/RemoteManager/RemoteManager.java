@@ -1,5 +1,4 @@
 package de.deltasiege.RemoteManager;
-
 import de.deltasiege.SmartRedstone.SmartRedstone;
 
 public class RemoteManager {

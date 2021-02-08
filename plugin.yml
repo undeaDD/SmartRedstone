@@ -1,7 +1,7 @@
 main: de.deltasiege.SmartRedstone.SmartRedstone
 name: SmartRedstone
-api-version: 1.16
-version: '1.0.1'
+version: '1.0.2'
+api-version: 1.13
 load: POSTWORLD
 description: Rust like Smart Things (+ Companion App)
 authors: [undeaD_D, Juli971Master]

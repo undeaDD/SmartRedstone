@@ -3,7 +3,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,11 +18,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 
 public class SmartEvents implements Listener {
-	HashMap<UUID, Location> tempStorage = new HashMap<UUID, Location>();
+	public HashMap<UUID, Location> tempStorage = new HashMap<UUID, Location>();
 	public List<Material> materials = Arrays.asList(Material.LEVER, Material.STONE_BUTTON, Material.COMPARATOR);
 	public Inventory addMenu;
 	public Inventory removeMenu;
-	
 	public SmartRedstone plugin;
 
 	public SmartEvents(SmartRedstone plugin) {

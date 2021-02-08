@@ -1,6 +1,5 @@
 package de.deltasiege.Storages;
 import java.util.UUID;
-
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
 import com.pablo67340.SQLiteLib.Main.SQLiteLib;

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
-
 import de.deltasiege.SmartRedstone.SmartRedstone;
 import de.deltasiege.SmartRedstone.Utils;
 
