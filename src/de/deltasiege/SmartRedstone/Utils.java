@@ -1,28 +1,31 @@
-package de.deltasiege.Models;
-
+package de.deltasiege.SmartRedstone;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
 public class Utils {
-
+	public static Inventory addMenu = createAddMenu();
+	public static Inventory removeMenu = createRemoveMenu();
+	
 	public static ItemStack paper = createItemStack(ItemResult.infoItem);
 	public static ItemStack plus = createItemStack(ItemResult.addItem);
 	public static ItemStack minus = createItemStack(ItemResult.removeItem);
 	public static ItemStack barrier = createItemStack(ItemResult.closeItem);
-	
+
+	public static String prefix = "[" + ChatColor.RED + "SmartDevice" + ChatColor.RESET + "]";
 	
 	private static ItemStack createItemStack(ItemResult result) {
 		ItemStack item = null;
@@ -82,18 +85,23 @@ public class Utils {
 		return item;
 	}
 	
+	public static void playSound(HumanEntity human, Sound sound) {
+		if (human instanceof Player) {
+			Player player = (Player) human;
+			player.playSound(player.getLocation(), sound, 10, 1);
+		}
+	}
+	
 	public static Inventory createAddMenu() {
-		Inventory menu = Bukkit.createInventory(null, InventoryType.HOPPER, "[" + ChatColor.RED + "SmartDevice" + ChatColor.RESET + "]");
+		Inventory menu = Bukkit.createInventory(null, InventoryType.HOPPER, prefix);
 		menu.setItem(0, paper);
 		menu.setItem(2, plus);
 		menu.setItem(4, barrier);
 		return menu;
 	}
-	
-	
 
 	public static Inventory createRemoveMenu() {
-		Inventory menu = Bukkit.createInventory(null, InventoryType.HOPPER, "[" + ChatColor.RED + "SmartDevice" + ChatColor.RESET + "]");
+		Inventory menu = Bukkit.createInventory(null, InventoryType.HOPPER, prefix);
 		menu.setItem(0, paper);
 		menu.setItem(2, minus);
 		menu.setItem(4, barrier);

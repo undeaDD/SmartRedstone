@@ -1,44 +1,37 @@
 package de.deltasiege.Storages;
-import java.util.HashMap;
 import org.bukkit.Location;
-import de.deltasiege.Models.SmartDevice;
+import org.bukkit.entity.HumanEntity;
+
+import de.deltasiege.SmartRedstone.Utils;
 
 public class TemporaryStorage implements StorageWrapper {
-	private HashMap<String, SmartDevice> data = new HashMap<String, SmartDevice>();
-	
-	private String getHashKey(Location loc) {
-		return loc.getWorld().getName() + "|" + loc.getBlockX() + "|" + loc.getBlockY() + "|" + loc.getBlockZ();
-	}
-	
-	@Override
-	public boolean isSmartDevice(Location loc) {
-		String key = getHashKey(loc);
-		return data.get(key) != null;
+
+	public TemporaryStorage() {
+		System.out.println(Utils.prefix + " Temporary Storage loaded");
 	}
 
 	@Override
-	public SmartDevice getSmartDevice(Location loc) {
-		String key = getHashKey(loc);
-		return data.get(key);
+	public boolean deviceIsPaired(HumanEntity player, Location loc) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
-	public boolean addSmartDevice(SmartDevice device) {
-		if (data.get(device.key) == null) {
-			data.put(device.key, device);
-			return true;
-		} else {
-			return false;
-		}
+	public boolean pairDevice(HumanEntity player, Location loc) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
-	public boolean removeSmartDevice(SmartDevice device) {
-		if (data.get(device.key) != null) {
-			data.remove(device.key);
-			return true;
-		} else {
-			return false;
-		}
+	public boolean unpairDevice(HumanEntity player, Location loc) {
+		// TODO Auto-generated method stub
+		return false;
 	}
+
+	@Override
+	public boolean deviceStateUpdated(Location loc, int newCurrent) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

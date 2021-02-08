@@ -1,6 +1,7 @@
 package de.deltasiege.SmartRedstone;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import de.deltasiege.RemoteManager.RemoteManager;
 import de.deltasiege.Storages.StorageWrapper;
@@ -13,21 +14,25 @@ public class SmartRedstone extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
-		super.onEnable();
-
 		storage = new TemporaryStorage();
 		remoteManager = new RemoteManager(this);
 		eventListener = new SmartEvents(this);
+		super.onEnable();
 	}
 	
 	@SuppressWarnings("restriction")
 	@Override
 	public void onDisable() {
-		super.onDisable();
 		HandlerList.unregisterAll(eventListener);
 		remoteManager.server.server.stop(1);
+
 		for (Player p : getServer().getOnlinePlayers()) {
-			p.closeInventory();
+			Inventory temp = p.getOpenInventory().getTopInventory();
+			if (temp != null && (temp.equals(Utils.addMenu) || temp.equals(Utils.removeMenu))) {
+				p.closeInventory();
+			}
 		}
+
+		super.onDisable();
 	}
 }

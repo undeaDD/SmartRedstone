@@ -1,11 +1,8 @@
 package de.deltasiege.RemoteManager;
-
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-
-import de.deltasiege.Models.SmartDevice;
 
 public class PushServer {
 	public RemoteManager remoteManager;
@@ -14,7 +11,7 @@ public class PushServer {
 		this.remoteManager = remoteManager;
 	}
 
-	public boolean sendPush(SmartDevice device) {
+	public boolean sendPush() {
 		try {
 			URL url = new URL("https://exp.host/--/api/v2/push/send");
 			HttpURLConnection http = (HttpURLConnection)url.openConnection();

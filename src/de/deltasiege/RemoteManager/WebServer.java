@@ -7,6 +7,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import de.deltasiege.SmartRedstone.Utils;
+
 @SuppressWarnings("restriction")
 public class WebServer {
 	public RemoteManager remoteManager;
@@ -21,8 +23,7 @@ public class WebServer {
 			server.setExecutor(null);
 			server.start();
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("WebServer could not be created. Your current java jre version does not support HttpServers");
+			System.out.println(Utils.prefix + " WebServer could not be created. Plugin will now be disabled");
 			remoteManager.plugin.getServer().getPluginManager().disablePlugin(remoteManager.plugin);
 		}
 	}
