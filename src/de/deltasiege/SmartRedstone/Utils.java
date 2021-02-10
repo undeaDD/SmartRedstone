@@ -102,7 +102,9 @@ public class Utils {
 		d.setUnderlined(true);
 		a.addExtra(d);
 
-		player.spigot().sendMessage(a);
+		try {
+			player.spigot().sendMessage(a);
+		} catch (Exception error) { /* Catching spigot call from AppUser :3 */ }
 	}
 	
 	// Play Sound Utils

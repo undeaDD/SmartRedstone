@@ -1,5 +1,6 @@
 package de.deltasiege.Storages;
-import java.util.UUID;
+import java.util.List;
+import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
 
@@ -12,7 +13,7 @@ public interface StorageWrapper {
 	 * 
 	 * @return boolean       - is the device paired or not
 	 */
-	public boolean deviceIsPaired(UUID player, Location loc);
+	public boolean deviceIsPaired(HumanEntity player, Location loc);
 	
 	/**
 	 * Player wants to pair the SmartDevice at the Location
@@ -44,4 +45,13 @@ public interface StorageWrapper {
 	 * @return boolean       - was anyone notified ? ( is anyone even affected )
 	 */
 	public boolean deviceStateUpdated(Location loc, int newCurrent);
+	
+	/**
+	 * Player wants to list all his paired SmartDevices
+	 * 
+	 * @param  Player player - Player to check against
+	 * 
+	 * @return jsonarray     - JsonArray ( consisting of JsonObjects )
+	 */
+	public List<Map<String, Object>> getPairedDevices(HumanEntity player);
 }
