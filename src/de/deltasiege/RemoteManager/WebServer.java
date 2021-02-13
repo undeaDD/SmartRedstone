@@ -1,95 +1,95 @@
 package de.deltasiege.RemoteManager;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import com.google.gson.Gson;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import de.deltasiege.SmartRedstone.AppUser;
 import de.deltasiege.SmartRedstone.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import com.google.common.base.Charsets;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 
 @SuppressWarnings("restriction")
-public class WebServer implements HttpHandler {
+public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 	public RemoteManager remoteManager;
 	public HttpServer server;
 	
 	public WebServer(RemoteManager remoteManager) {
 		this.remoteManager = remoteManager;
-		
-		try {
-			server = HttpServer.create(new InetSocketAddress("0.0.0.0", 1337), 0);
-			server.createContext("/api", this);
-			server.setExecutor(null);
-			server.start();
-		} catch (IOException error) {
-			server.stop(0);
-			Utils.log("API-Server could not be created. Plugin will now be disabled");
-			remoteManager.plugin.getServer().getPluginManager().disablePlugin(remoteManager.plugin);
-		}
-	}
-
-	@Override
-	public void handle(HttpExchange exchange) throws IOException {
-		Map<String, String> params = toMap(exchange);
-		if (!params.containsKey("action")) {
-			exchange.sendResponseHeaders(400, 0);
-			exchange.close();
-			return;
-		}
-		
-		switch (params.get("action")) {
-			case "update":
-				handleUpdate(exchange, params);
-				break;
-			case "unpair":
-				handleUnpair(exchange, params);
-			case "list":
-				handleList(exchange, params);
-			default:
-				exchange.sendResponseHeaders(400, 0);
-				break;
-		}
-        exchange.close();
 	}
 	
-	private void handleList(HttpExchange exchange, Map<String, String> params) throws IOException {
+	@Override
+    protected void channelRead0(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+   
+        try {
+        	Map<String, String> params = toMap(request);
+            if (!params.containsKey("action")) {
+            	sendReseponse(ctx, response, HttpResponseStatus.NOT_FOUND);
+    			return;
+    		}
+            
+	        switch (params.get("action")) {
+				case "update":
+					handleUpdate(ctx, response, params);
+					return;
+				case "unpair":
+					handleUnpair(ctx, response, params);
+					return;
+				case "list":
+					handleList(ctx, response, params);
+					return;
+				default:
+					sendReseponse(ctx, response, HttpResponseStatus.NOT_FOUND);
+					return;
+			}    
+        } catch (Exception error) {
+        	error.printStackTrace();
+        }
+    }
+
+	private void handleList(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
 		try {
 			UUID uuid = UUID.fromString(params.get("uuid"));
 			AppUser user = new AppUser(uuid);
 			List<Map<String, Object>> result = this.remoteManager.plugin.storage.getPairedDevices(user);
-			String response = new Gson().toJson(result);
-			exchange.getResponseHeaders().set("Content-Type", "appication/json");
-			exchange.sendResponseHeaders(200, response.length());
-	        OutputStream os = exchange.getResponseBody();
-	        os.write(response.getBytes());
-	        os.close();
+			String jsonString = new Gson().toJson(result);
+			
+			response.trailingHeaders().add("Content-Type", "appication/json");
+			response.content().writeBytes(Charsets.UTF_8.encode(jsonString));
+			sendReseponse(ctx, response, HttpResponseStatus.OK);
 		} catch (Exception error) { error.printStackTrace(); }
 	}
 
-	private void handleUnpair(HttpExchange exchange, Map<String, String> params) throws IOException {
+	private void handleUnpair(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
 		UUID uuid = UUID.fromString(params.get("uuid"));
 		Location device = Utils.locationFromString(params.get("loc"));
 		AppUser user = new AppUser(uuid);
 
 		if (this.remoteManager.plugin.storage.deviceIsPaired(user, device)) {
 			this.remoteManager.plugin.storage.unpairDevice(user, device);
-			exchange.sendResponseHeaders(200, 0);
+			sendReseponse(ctx, response, HttpResponseStatus.OK);
 		} else {
-			exchange.sendResponseHeaders(400, 0);
+			sendReseponse(ctx, response, HttpResponseStatus.FORBIDDEN);
 		}
 	}
 	
-	private void handleUpdate(HttpExchange exchange, Map<String, String> params) throws IOException {
+	private void handleUpdate(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
 		UUID uuid = UUID.fromString(params.get("uuid"));
 		Location device = Utils.locationFromString(params.get("loc"));
 		Integer current = Integer.parseInt(params.get("current"));
@@ -109,7 +109,7 @@ public class WebServer implements HttpHandler {
 						}
 				    }
 				});
-				exchange.sendResponseHeaders(200, 0);
+				sendReseponse(ctx, response, HttpResponseStatus.OK);
 				break;
 			case STONE_BUTTON:
 				Bukkit.getScheduler().runTask(this.remoteManager.plugin, new Runnable() {
@@ -135,23 +135,43 @@ public class WebServer implements HttpHandler {
 				    }
 				}, 20L);
 				
-				exchange.sendResponseHeaders(200, 0);
+				sendReseponse(ctx, response, HttpResponseStatus.OK);
 				break;
 			default:
-				exchange.sendResponseHeaders(400, 0);
+				sendReseponse(ctx, response, HttpResponseStatus.FORBIDDEN);
 				break;
 			}
 		} else {
-			exchange.sendResponseHeaders(400, 0);
+			sendReseponse(ctx, response, HttpResponseStatus.FORBIDDEN);
 		}
 	}
+	
+	// HELPER METHODS
+	
+	private void sendReseponse(ChannelHandlerContext ctx, FullHttpResponse response, HttpResponseStatus status) {
+        ChannelPromise promise = ctx.channel().newPromise();
 
-	private static Map<String, String> toMap(HttpExchange exchange) {
-		String query = exchange.getRequestURI().getQuery();
-	    if (query == null || query.isEmpty()) { 
+        response.setStatus(status);
+        ctx.channel().writeAndFlush(response, promise);
+        promise.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                future.channel().close();
+            }
+        });
+	}
+	
+	private static Map<String, String> toMap(HttpRequest request) {
+		String[] temp = request.uri().split("\\?");
+        if (temp.length == 1) {
+        	return Collections.emptyMap();
+        }
+
+        String query = temp[temp.length - 1];
+	    if (query == null || query.isEmpty() || !query.contains("&")) { 
 	    	return Collections.emptyMap(); 
-	    } else {
-	    	return Stream.of(query.split("&")).filter(s -> !s.isEmpty()).map(kv -> kv.split("=", 2)) .collect(Collectors.toMap(x -> x[0], x-> x[1]));
 	    }
+	    
+	    return Stream.of(query.split("&")).filter(s -> !s.isEmpty()).map(kv -> kv.split("=", 2)) .collect(Collectors.toMap(x -> x[0], x-> x[1]));
 	}
 }

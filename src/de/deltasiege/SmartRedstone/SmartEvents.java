@@ -8,7 +8,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockRedstoneEvent;
@@ -29,6 +31,16 @@ public class SmartEvents implements Listener {
 		this.addMenu = Utils.createAddMenu();
 		this.removeMenu = Utils.createRemoveMenu();
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+	}
+	
+	public void onDisable() {
+		HandlerList.unregisterAll(this);
+		for (Player p : plugin.getServer().getOnlinePlayers()) {
+			Inventory temp = p.getOpenInventory().getTopInventory();
+			if (temp != null && (temp.equals(addMenu) || temp.equals(removeMenu))) {
+				p.closeInventory();
+			}
+		}
 	}
 
 	@EventHandler

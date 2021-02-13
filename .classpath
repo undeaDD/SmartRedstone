@@ -8,5 +8,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="server.jar"/>
 	<classpathentry kind="lib" path="SQLiteLib.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Domin/eclipse-workspace/SmartRedstone/ProtocolLib.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -30,7 +30,7 @@ public class Utils {
 
 	// Log Utils
 	
-	public static String prefix = "[" + ChatColor.RED + "SmartDevice" + ChatColor.RESET + "]";
+	public static String prefix = "[" + ChatColor.RED + "SmartRedstone" + ChatColor.RESET + "]";
 	
 	public static void log(String msg) {
 		System.out.println(ChatColor.stripColor(prefix + " " + msg.trim()));
