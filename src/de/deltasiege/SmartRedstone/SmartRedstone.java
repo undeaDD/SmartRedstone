@@ -3,12 +3,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import de.deltasiege.RemoteManager.RemoteManager;
 import de.deltasiege.Storages.StorageWrapper;
 import de.deltasiege.Storages.TemporaryStorage;
+import de.deltasiege.bStats.Metrics;
 
 public class SmartRedstone extends JavaPlugin {
 	public StorageWrapper storage;
 	public RemoteManager remoteManager;
 	public SmartEvents eventListener;
 	public SmartCommands commandHandler;
+	public Metrics metrics;
    
 	@Override
 	public void onEnable() {
@@ -21,6 +23,7 @@ public class SmartRedstone extends JavaPlugin {
 		remoteManager = new RemoteManager(this);
 		eventListener = new SmartEvents(this);
 		commandHandler = new SmartCommands(this);
+		metrics = new Metrics(this, 10318);
 		super.onEnable();
 	}
 	
