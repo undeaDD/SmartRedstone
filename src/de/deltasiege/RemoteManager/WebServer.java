@@ -54,6 +54,9 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 				case "list":
 					handleList(ctx, response, params);
 					return;
+				case "version":
+					handleVersion(ctx, response, params);
+					return;
 				default:
 					sendReseponse(ctx, response, HttpResponseStatus.NOT_FOUND);
 					return;
@@ -63,6 +66,14 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
         }
     }
 
+	private void handleVersion(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
+		try {
+			String version = this.remoteManager.plugin.getDescription().getVersion();
+			response.content().writeBytes(Charsets.UTF_8.encode(version));
+			sendReseponse(ctx, response, HttpResponseStatus.OK);
+		} catch (Exception error) { error.printStackTrace(); }
+	}
+	
 	private void handleList(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
 		try {
 			UUID uuid = UUID.fromString(params.get("uuid"));
@@ -168,10 +179,10 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
         }
 
         String query = temp[temp.length - 1];
-	    if (query == null || query.isEmpty() || !query.contains("&")) { 
+	    if (query == null || query.isEmpty()) { 
 	    	return Collections.emptyMap(); 
 	    }
 	    
-	    return Stream.of(query.split("&")).filter(s -> !s.isEmpty()).map(kv -> kv.split("=", 2)) .collect(Collectors.toMap(x -> x[0], x-> x[1]));
+	    return Stream.of(query.split("\\&")).filter(s -> !s.isEmpty()).map(kv -> kv.split("=", 2)) .collect(Collectors.toMap(x -> x[0], x-> x[1]));
 	}
 }
