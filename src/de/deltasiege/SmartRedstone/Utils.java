@@ -1,7 +1,12 @@
 package de.deltasiege.SmartRedstone;
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -19,21 +24,25 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 
 public class Utils {
-
+	public static List<Material> materials = Arrays.asList(Material.LEVER, Material.STONE_BUTTON, Material.COMPARATOR);
+	
 	// Log Utils
 	
-	public static String prefix = "[" + ChatColor.RED + "SmartRedstone" + ChatColor.RESET + "]";
+	public static String prefix = ChatColor.RESET + "[" + ChatColor.RED + "SmartRedstone" + ChatColor.RESET + "]";
 	
 	public static void log(String msg) {
 		System.out.println(ChatColor.stripColor(prefix + " " + msg.trim()));
+	}
+	
+	public static int parseInt(String possibleInteger) {
+		try { return Integer.parseInt(possibleInteger); } catch (Exception error) { return 0; }
 	}
 	
 	// NMS Block updating Utils
@@ -55,15 +64,20 @@ public class Utils {
 	private static Class<?> BlockPosition, CraftBlock, CraftWorld, WorldServer;
 	private static Method getNMSBlock, getHandle, applyPhysics;
 	
-	public static void setUpNMS() throws Exception {
-		BlockPosition = getNMSClass("net.minecraft.server.%s.BlockPosition");
-		CraftBlock = getNMSClass("org.bukkit.craftbukkit.%s.block.CraftBlock");
-		CraftWorld = getNMSClass("org.bukkit.craftbukkit.%s.CraftWorld");
-		WorldServer = getNMSClass("net.minecraft.server.%s.WorldServer");
-		getNMSBlock = CraftBlock.getDeclaredMethod("getNMSBlock", new Class<?>[]{});
-		getNMSBlock.setAccessible(true);
-		getHandle = CraftWorld.getDeclaredMethod("getHandle", new Class<?>[]{});
-		applyPhysics = WorldServer.getMethod("applyPhysics", BlockPosition, getNMSClass("net.minecraft.server.%s.Block"));
+	public static void setUpNMS(SmartRedstone plugin) {
+		try { 
+			BlockPosition = getNMSClass("net.minecraft.server.%s.BlockPosition");
+			CraftBlock = getNMSClass("org.bukkit.craftbukkit.%s.block.CraftBlock");
+			CraftWorld = getNMSClass("org.bukkit.craftbukkit.%s.CraftWorld");
+			WorldServer = getNMSClass("net.minecraft.server.%s.WorldServer");
+			getNMSBlock = CraftBlock.getDeclaredMethod("getNMSBlock", new Class<?>[]{});
+			getNMSBlock.setAccessible(true);
+			getHandle = CraftWorld.getDeclaredMethod("getHandle", new Class<?>[]{});
+			applyPhysics = WorldServer.getMethod("applyPhysics", BlockPosition, getNMSClass("net.minecraft.server.%s.Block"));
+		} catch (Exception error) {
+			Utils.log("This MC Version is not supported (NMSReflectionException). Plugin will now be disabled");
+			plugin.getServer().getPluginManager().disablePlugin(plugin);
+		}
 	}
 	
 	private static Class<?> getNMSClass(String name) throws ClassNotFoundException {
@@ -83,11 +97,11 @@ public class Utils {
 	
 	// Tellraw Utils
 	
-	public static void sendRegisterReminder(HumanEntity player) {
+	public static void sendRegisterReminder(HumanEntity player, boolean isFeedbackLink) {
 		TextComponent a = new TextComponent("[");
 		a.setColor(net.md_5.bungee.api.ChatColor.RESET);
 		
-		TextComponent b = new TextComponent("SmartDevice");
+		TextComponent b = new TextComponent("SmartRedstone");
 		b.setColor(net.md_5.bungee.api.ChatColor.RED);
 		a.addExtra(b);
 		
@@ -95,9 +109,8 @@ public class Utils {
 		c.setColor(net.md_5.bungee.api.ChatColor.RESET);
 		a.addExtra(c);
 		
-		TextComponent d = new TextComponent("Click here to pair your Companion App");
-		d.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sd app"));
-		d.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Will run command: /sd app")));
+		TextComponent d = new TextComponent(isFeedbackLink ? "Click here to send feedback." : "Click here to open the tutorial.");
+		d.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, isFeedbackLink ? "https://www.google.de" : "https://www.google.de"));
 		d.setColor(net.md_5.bungee.api.ChatColor.RESET);
 		d.setUnderlined(true);
 		a.addExtra(d);
@@ -118,6 +131,7 @@ public class Utils {
 	
 	// ItemStack Utils
 	
+	public static ItemStack nametag = createItemStack(ItemResult.renameItem);
 	public static ItemStack paper = createItemStack(ItemResult.infoItem);
 	public static ItemStack plus = createItemStack(ItemResult.addItem);
 	public static ItemStack minus = createItemStack(ItemResult.removeItem);
@@ -131,11 +145,17 @@ public class Utils {
 		Method method;
 
 		switch (result) {
+		case renameItem:
+			item = new ItemStack(Material.NAME_TAG);
+			imeta = item.getItemMeta();
+			imeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GREEN + "Rename Device");
+			item.setItemMeta(imeta);
+			break;
 		case infoItem:
 			item = new ItemStack(Material.PAPER);
 			imeta = item.getItemMeta();
-			imeta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + "Informations");
-			imeta.setLore(Arrays.asList("work in progress", "...", "..."));
+			imeta.setDisplayName(prefix);
+			imeta.setLore(Arrays.asList(ChatColor.RESET + "" + ChatColor.WHITE + "- Control Devices via App", ChatColor.RESET + "" + ChatColor.WHITE + "- Get notified via App", ChatColor.RESET + "" + ChatColor.WHITE + "- MultiServer support", "Click to show tutorial ..."));
 			item.setItemMeta(imeta);
 			break;
 		case addItem:
@@ -191,7 +211,7 @@ public class Utils {
 
 	public static Inventory createRemoveMenu() {
 		Inventory menu = Bukkit.createInventory(null, InventoryType.HOPPER, prefix);
-		menu.setItem(0, paper);
+		menu.setItem(0, nametag);
 		menu.setItem(2, minus);
 		menu.setItem(4, barrier);
 		return menu;
@@ -199,20 +219,46 @@ public class Utils {
 	
 	public static ItemResult itemClicked(ItemStack current) {
 		if (current == null) {
-			return ItemResult.infoItem;
+			return null;
+		} else if (current.equals(nametag)) {
+			return ItemResult.renameItem;
 		} else if (current.equals(plus)) {
 			return ItemResult.addItem;
 		} else if (current.equals(minus)) {
 			return ItemResult.removeItem;
 		} else if (current.equals(barrier)) {
 			return ItemResult.closeItem;
-		} else {
+		} else if (current.equals(paper)) {
 			return ItemResult.infoItem;
+		} else {
+			return null;
 		}
 	}
 
-	
 	public static enum ItemResult {
-		addItem, removeItem, closeItem, infoItem
+		addItem, removeItem, closeItem, infoItem, renameItem
+	}
+
+	public static int locToCurrent(Location loc) {
+		switch (loc.getBlock().getType()) {
+		case LEVER:
+		case STONE_BUTTON:
+			Switch block = (Switch) loc.getBlock().getBlockData();
+			return block.isPowered() ? 15 : 0;
+		case COMPARATOR:
+			return loc.getBlock().getBlockPower();
+		default:
+			return 0;
+		}
+	}
+	
+	public static String compressString(String srcTxt) throws Exception {
+		ByteArrayOutputStream rstBao = new ByteArrayOutputStream();
+		GZIPOutputStream zos = new GZIPOutputStream(rstBao);
+		zos.write(srcTxt.getBytes());
+		zos.flush(); zos.close();
+		byte[] bytes = rstBao.toByteArray();
+		rstBao.flush(); rstBao.close();
+		return new String(Base64.getEncoder().encode(bytes));
 	}
 }

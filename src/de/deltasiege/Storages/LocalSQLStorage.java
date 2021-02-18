@@ -46,4 +46,22 @@ public class LocalSQLStorage implements StorageWrapper {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void removeInvalidBlocks(Location[] invalidBlocks) {
+		// TODO Auto-generated method stub
+		return;
+	}
+
+	@Override
+	public boolean setDeviceTitle(HumanEntity player, Location loc, String newTitle) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void updatePushToken(HumanEntity player, String newtoken) {
+		// TODO Auto-generated method stub
+		return;
+	}
 }
