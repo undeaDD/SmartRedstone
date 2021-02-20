@@ -1,4 +1,5 @@
 package de.deltasiege.RemoteManager;
+import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.Collections;
@@ -15,6 +16,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import com.google.common.base.Charsets;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -65,6 +68,9 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
 				case "push":
 					handlePush(ctx, response, params);
 					return;
+				case "logo":
+					handleLogo(ctx, response);
+					return;
 				default:
 					sendResponse(ctx, response, HttpResponseStatus.NOT_FOUND);
 					return;
@@ -73,6 +79,20 @@ public class WebServer extends SimpleChannelInboundHandler<HttpRequest> {
         	error.printStackTrace();
         }
     }
+	
+	private void handleLogo(ChannelHandlerContext ctx, FullHttpResponse response) {
+		File f = new File("server-icon.png");
+		System.out.println(f.getAbsolutePath());
+		if(f.exists() && !f.isDirectory()) { 
+			try {
+				response.trailingHeaders().add("Content-Type", "iamge/*");
+				response.content().writeBytes(Files.readAllBytes(f.toPath()));
+				sendResponse(ctx, response, HttpResponseStatus.OK);
+				return;
+			} catch (IOException e) { e.printStackTrace(); }	
+		}
+		sendResponse(ctx, response, HttpResponseStatus.NOT_FOUND);
+	}
 
 	private void handlePush(ChannelHandlerContext ctx, FullHttpResponse response, Map<String, String> params) throws IOException {
 		try {
