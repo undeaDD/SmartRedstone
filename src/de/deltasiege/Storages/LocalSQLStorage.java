@@ -13,7 +13,18 @@ public class LocalSQLStorage implements StorageWrapper {
 
 	public LocalSQLStorage(SmartRedstone plugin) {
 		this.plugin = plugin;
-		this.sql.initializeDatabase(plugin, "database", "CREATE TABLE IF NOT EXISTS smart_devices");
+		this.sql.initializeDatabase(plugin, "database", "CREATE TABLE IF NOT EXISTS `smart_devices` ("
+				+ "  `device_id` INT NOT NULL AUTO_INCREMENT,"
+				+ "  `type` VARCHAR(10) NULL,"
+				+ "  `state` CHAR(1) NULL,"
+				+ "  PRIMARY KEY (`device_id`));"
+				+ "CREATE TABLE IF NOT EXISTS `users` ("
+				+ "  `uuid` VARCHAR(36) NOT NULL,"
+				+ "  `device_id` INT NOT NULL,"
+				+ "  `is_owner` CHAR(1) NULL,"
+				+ "  PRIMARY KEY (`uuid`, `device_id`));"
+				);
+
 		Utils.log("Local SQL Storage loaded");
 	}
 
